@@ -2,8 +2,7 @@ import pygame
 from pygame.locals import *
 
 def lose():
-    global running
-    running = False
+    pygame.quit()
 
 pygame.init()
 screen = pygame.display.set_mode((550, 700))
@@ -36,7 +35,7 @@ player2_trail = []
 
 running = True
 
-while running:
+while True:
     clock.tick(clock_tick)
 
     for event in pygame.event.get():
