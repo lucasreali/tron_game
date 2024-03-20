@@ -23,14 +23,14 @@ color_trail2 = (255, 255, 0)
 clock_tick = 25
 clock = pygame.time.Clock()
 
+players_speed = 5
+
 player1_pos = [275, 600]
 player1_direction = UP
-player1_speed = 5
 player1_trail = []
 
 player2_pos = [275, 100]
 player2_direction = DOWN
-player2_speed = 5
 player2_trail = []
 
 running = True
@@ -57,27 +57,27 @@ while True:
     elif keys[K_s] and player2_direction != UP:
         player2_direction = DOWN
     elif keys[K_a] and player2_direction != RIGHT:
-        player2_direction = LEFT
+        player2_direction = LEFTd
     elif keys[K_d] and player2_direction != LEFT:
         player2_direction = RIGHT
 
     if player1_direction == UP:
-        player1_pos[1] -= player1_speed
+        player1_pos[1] -= players_speed
     elif player1_direction == DOWN:
-        player1_pos[1] += player1_speed
+        player1_pos[1] += players_speed
     elif player1_direction == LEFT:
-        player1_pos[0] -= player1_speed
+        player1_pos[0] -= players_speed
     elif player1_direction == RIGHT:
-        player1_pos[0] += player1_speed
+        player1_pos[0] += players_speed
 
     if player2_direction == UP:
-        player2_pos[1] -= player2_speed
+        player2_pos[1] -= players_speed
     elif player2_direction == DOWN:
-        player2_pos[1] += player2_speed
+        player2_pos[1] += players_speed
     elif player2_direction == LEFT:
-        player2_pos[0] -= player2_speed
+        player2_pos[0] -= players_speed
     elif player2_direction == RIGHT:
-        player2_pos[0] += player2_speed
+        player2_pos[0] += players_speed
 
     if player1_pos[0] < 0 or player1_pos[0] >= screen.get_width() or player1_pos[1] < 0 or player1_pos[1] >= screen.get_height():
         lose()
