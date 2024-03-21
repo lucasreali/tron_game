@@ -57,7 +57,7 @@ while True:
     elif keys[K_s] and player2_direction != UP:
         player2_direction = DOWN
     elif keys[K_a] and player2_direction != RIGHT:
-        player2_direction = LEFTd
+        player2_direction = LEFT
     elif keys[K_d] and player2_direction != LEFT:
         player2_direction = RIGHT
 
@@ -100,7 +100,6 @@ while True:
     for pos in player2_trail:
         pygame.draw.rect(screen, color_trail2, (pos[0], pos[1], 5, 5))
 
-    # Desenhar os jogadores
     pygame.draw.rect(screen, players_color, (player1_pos[0], player1_pos[1], 5, 5))
     pygame.draw.rect(screen, players_color, (player2_pos[0], player2_pos[1], 5, 5))
 
