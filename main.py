@@ -1,14 +1,14 @@
 import pygame, time
 from pygame.locals import *
+                
 
 def lose():
-    global game_over
+    global points_player1, points_player2
 
     sound_die.play()
-    time.sleep(2)
+    time.sleep(1.5)
+    screen.fill((0, 0, 0))
 
-    # screen.fill((0, 0, 0))
-    screen.blit(img_bg, (0, 0))
 
     if if_lose != "tie":
         font = pygame.font.SysFont(None, 48)
@@ -16,12 +16,17 @@ def lose():
         text_rect = lose_text.get_rect(center=(275, 200))
         screen.blit(lose_text, text_rect)
 
+
         if if_lose == "YELLOW":
+            points_player1 += 1
             font = pygame.font.SysFont(None, 30)
             lose_text = font.render(if_lose , True, (255, 255, 0))
             text_rect = lose_text.get_rect(center=(275, 240))
             screen.blit(lose_text, text_rect)
+
+
         elif if_lose == "BLUE":
+            points_player2 += 1
             font = pygame.font.SysFont(None, 30)
             lose_text = font.render(if_lose, True, (0, 0, 255))
             text_rect = lose_text.get_rect(center=(275, 240))
@@ -57,13 +62,16 @@ def lose():
                     reset_game()
 
 def reset_game():
-    global player1_direction, player1_pos, player1_direction, player1_trail, player2_direction, player2_pos, player2_trail
+    global player1_pos, player1_direction, player1_trail, player2_direction, player2_pos, player2_trail, img_player, rotate_img1, rotate_img2
+
     player1_pos = [275, 600]
     player1_direction = UP
+    rotate_img1 = pygame.transform.rotate(img_player, 0)
     player1_trail = []
 
     player2_pos = [275, 100]
     player2_direction = DOWN
+    rotate_img2 = pygame.transform.rotate(img_player, 180)
     player2_trail = []
 
 
@@ -79,9 +87,19 @@ RIGHT = 1
 DOWN = 2
 LEFT = 3
 
-player_color = (255, 255, 255)
-player = pygame.Surface((5, 5))
-player.fill(player_color)
+explosion_size = (60, 60)
+img_explosion_load = pygame.image.load("assets/img/explosion.png")
+img_explosion = pygame.transform.scale(img_explosion_load, explosion_size)
+
+img_size = (15, 40)
+img_player = pygame.transform.scale(pygame.image.load("assets/img/player.png"), img_size)
+
+rotate_img1 = pygame.transform.rotate(img_player, 0)
+rotate_img2 = pygame.transform.rotate(img_player, 180)
+
+# player_color = (255, 255, 255)
+# player = pygame.Surface((5, 5))
+# player.fill(player_color)
 
 color_trail1 = (0, 0, 255)
 color_trail2 = (255, 255, 0)
@@ -126,21 +144,30 @@ while not game_over:
     keys = pygame.key.get_pressed()
     if keys[K_UP] and player1_direction != DOWN:
         player1_direction = UP
+        rotate_img1 = pygame.transform.rotate(img_player, 0)
     elif keys[K_DOWN] and player1_direction != UP:
         player1_direction = DOWN
+        rotate_img1 = pygame.transform.rotate(img_player, 180)
     elif keys[K_LEFT] and player1_direction != RIGHT:
         player1_direction = LEFT
+        rotate_img1 = pygame.transform.rotate(img_player, 90)
     elif keys[K_RIGHT] and player1_direction != LEFT:
         player1_direction = RIGHT
+        rotate_img1 = pygame.transform.rotate(img_player, -90)
 
     if keys[K_w] and player2_direction != DOWN:
         player2_direction = UP
+        rotate_img2 = pygame.transform.rotate(img_player, 0)
     elif keys[K_s] and player2_direction != UP:
         player2_direction = DOWN
+        rotate_img2 = pygame.transform.rotate(img_player, 180)
     elif keys[K_a] and player2_direction != RIGHT:
         player2_direction = LEFT
+        rotate_img2 = pygame.transform.rotate(img_player, 90)
     elif keys[K_d] and player2_direction != LEFT:
         player2_direction = RIGHT
+        rotate_img2 = pygame.transform.rotate(img_player, -90)
+
 
     if player1_direction == UP:
         player1_pos[1] -= players_speed
@@ -162,22 +189,18 @@ while not game_over:
 
     if player1_pos[0] < 0 or player1_pos[0] >= screen.get_width() or player1_pos[1] < 0 or player1_pos[1] >= screen.get_height():
         if_lose = "BLUE"
-        points_player2 += 1
         lose()
 
     if player2_pos[0] < 0 or player2_pos[0] >= screen.get_width() or player2_pos[1] < 0 or player2_pos[1] >= screen.get_height():
         if_lose = "YELLOW"
-        points_player1 += 1
         lose()
 
     if player1_pos in player1_trail or player1_pos in player2_trail:
         if_lose = "BLUE"
-        points_player2 += 1
         lose()
 
     if player2_pos in player1_trail or player2_pos in player2_trail:
         if_lose = "YELLOW"
-        points_player1 += 1
         lose()
 
     if player1_pos == player2_pos:
@@ -195,8 +218,8 @@ while not game_over:
     for pos in player2_trail:
         pygame.draw.rect(screen, color_trail2, (pos[0], pos[1], 5, 5))
 
-    screen.blit(player, player1_pos)
-    screen.blit(player, player2_pos)
+    screen.blit(rotate_img1, rotate_img1.get_rect(center=player1_pos))
+    screen.blit(rotate_img2, rotate_img2.get_rect(center=player2_pos))
 
     pygame.display.update()
 
