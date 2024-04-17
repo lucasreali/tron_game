@@ -1,201 +1,208 @@
-import pygame
-import time
-import random
-from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_w, K_s, K_a, K_d, QUIT, KEYDOWN, K_SPACE
+import pygame, time
+from pygame.locals import *
+                
 
-class Player:
-    def __init__(self, pos, direction, color, speed, trail_color):
-        self.pos = pos
-        self.direction = direction
-        self.color = color
-        self.speed = speed
-        self.trail_color = trail_color
-        self.trail = []
+def lose():
+    global points_player1, points_player2
 
-    def move(self):
-        if self.direction == K_UP:
-            self.pos[1] -= self.speed
-        elif self.direction == K_DOWN:
-            self.pos[1] += self.speed
-        elif self.direction == K_LEFT:
-            self.pos[0] -= self.speed
-        elif self.direction == K_RIGHT:
-            self.pos[0] += self.speed
+    sound_die.play()
+    time.sleep(1.5)
+    screen.fill((0, 0, 0))
 
-class Game:
-    def __init__(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode((550, 700))
-        self.clock = pygame.time.Clock()
-        self.game_over = False
-        self.points_player1 = 0
-        self.points_player2 = 0
-        self.players_speed1 = 5
-        self.players_speed2 = 5
-        self.powerUp_freezing_pos = (-10, -10)
-        self.sound_die = pygame.mixer.Sound("assets/sounds/die.mp3")
-        self.sound_start = pygame.mixer.Sound("assets/sounds/start.mp3")
-        self.sound_move = pygame.mixer.Sound("assets/sounds/move.mp3")
-        self.sound_bg = pygame.mixer.Sound("assets/sounds/bg-music.mp3")
-        self.clock_tick = 25
-        self.sec = 0
-        self.cont = 0
-        self.if_lose = ""
-        self.img_bg = pygame.image.load("assets/img/bg-tron.jpg")
-        self.font = pygame.font.SysFont(None, 48)
-        self.fontsys = pygame.font.SysFont(None, 25)
+    if if_lose != "tie":
+        font = pygame.font.SysFont(None, 48)
+        lose_text = font.render("YOU LOSE!", True, (255, 0, 0))
+        text_rect = lose_text.get_rect(center=(275, 200))
+        screen.blit(lose_text, text_rect)
 
-        self.player1 = Player([275, 600], K_UP, (255, 255, 255), self.players_speed1, (0, 0, 255))
-        self.player2 = Player([275, 100], K_DOWN, (255, 255, 255), self.players_speed2, (255, 255, 0))
+        if if_lose == "YELLOW":
+            points_player1 += 1
+            font = pygame.font.SysFont(None, 30)
+            lose_text = font.render(if_lose , True, (255, 255, 0))
+            text_rect = lose_text.get_rect(center=(275, 240))
+            screen.blit(lose_text, text_rect)
 
-    def onGridRandom(self):
-        x = random.randint(0, 54)
-        y = random.randint(0, 69)
-        pos = (x * 5, y * 5)
+        elif if_lose == "BLUE":
+            points_player2 += 1
+            font = pygame.font.SysFont(None, 30)
+            lose_text = font.render(if_lose, True, (0, 0, 255))
+            text_rect = lose_text.get_rect(center=(275, 240))
+            screen.blit(lose_text, text_rect)
+    
+    elif if_lose == "tie":
+        font = pygame.font.SysFont(None, 48)
+        lose_text = font.render("A TIE", True, (255, 0, 255))
+        text_rect = lose_text.get_rect(center=(275, 200))
+        screen.blit(lose_text, text_rect)
 
-        while pos in self.player1.trail or pos in self.player2.trail:
-            x = random.randint(0, 54)
-            y = random.randint(0, 69)
-            pos = (x * 5, y * 5)
+    game_over = True
+    button_text = font.render("Press SPACE", True, (255, 255, 225))
+    button_rect = button_text.get_rect(center=(275, 375))
+    screen.blit(button_text, button_rect)
 
-        return pos
+    fontsys = pygame.font.SysFont(None, 25)
 
-    def reset_game(self):
-        self.player1 = Player([275, 600], K_UP, (255, 255, 255), self.players_speed1, (0, 0, 255))
-        self.player2 = Player([275, 100], K_DOWN, (255, 255, 255), self.players_speed2, (255, 255, 0))
-        self.if_lose = ""
+    points_text = fontsys.render(f"Blue: {points_player1} | Yellow: {points_player2}", True, (255, 255, 255))
+    points_rect = points_text.get_rect(center=(282, 450))
+    screen.blit(points_text, points_rect)
 
-    def lose(self):
-        self.sound_die.play()
-        time.sleep(1.5)
-        self.screen.fill((0, 0, 0))
+    pygame.display.update()
 
-        if self.if_lose != "tie":
-            lose_text = self.font.render("YOU LOSE!", True, (255, 0, 0))
-            text_rect = lose_text.get_rect(center=(275, 200))
-            self.screen.blit(lose_text, text_rect)
+    while game_over:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+            elif event.type == KEYDOWN:
+                if event.key == K_SPACE:
+                    game_over = False
+                    reset_game()
 
-            if self.if_lose == "YELLOW":
-                self.points_player1 += 1
-                lose_text = self.font.render(self.if_lose, True, (255, 255, 0))
-                text_rect = lose_text.get_rect(center=(275, 240))
-                self.screen.blit(lose_text, text_rect)
-            elif self.if_lose == "BLUE":
-                self.points_player2 += 1
-                lose_text = self.font.render(self.if_lose, True, (0, 0, 255))
-                text_rect = lose_text.get_rect(center=(275, 240))
-                self.screen.blit(lose_text, text_rect)
-        elif self.if_lose == "tie":
-            lose_text = self.font.render("A TIE", True, (255, 0, 255))
-            text_rect = lose_text.get_rect(center=(275, 200))
-            self.screen.blit(lose_text, text_rect)
+def reset_game():
+    global player1_pos, player1_direction, player1_trail, player2_direction, player2_pos, player2_trail, img_player, rotate_img1, rotate_img2
 
-        self.game_over = True
-        button_text = self.font.render("Press SPACE", True, (255, 255, 225))
-        button_rect = button_text.get_rect(center=(275, 375))
-        self.screen.blit(button_text, button_rect)
+    player1_pos = [275, 600]
+    player1_direction = UP
+    rotate_img1 = pygame.transform.rotate(img_player, 0)
+    player1_trail = []
 
-        points_text = self.fontsys.render(f"Blue: {self.points_player1} | Yellow: {self.points_player2}", True,
-                                          (255, 255, 255))
-        points_rect = points_text.get_rect(center=(282, 450))
-        self.screen.blit(points_text, points_rect)
+    player2_pos = [275, 100]
+    player2_direction = DOWN
+    rotate_img2 = pygame.transform.rotate(img_player, 180)
+    player2_trail = []
 
-        pygame.display.update()
 
-        while self.game_over:
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                elif event.type == KEYDOWN:
-                    if event.key == K_SPACE:
-                        self.game_over = False
-                        self.reset_game()
+pygame.init()
+screen = pygame.display.set_mode((550, 700))
+img_bg = pygame.image.load("assets/img/bg-tron.jpg")
 
-    def run(self):
-        self.sound_start.play()
-        time.sleep(1)
-        self.sound_bg.play(-1)
+name = "Tron Game"
+pygame.display.set_caption(name)
 
-        while not self.game_over:
-            self.clock.tick(self.clock_tick)
-            self.cont += 1
-            if self.cont == self.clock_tick:
-                self.sec += 1
-                self.cont = 0
+UP = 0
+RIGHT = 1
+DOWN = 2
+LEFT = 3
 
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
+explosion_size = (60, 60)
+img_explosion_load = pygame.image.load("assets/img/explosion.png")
+img_explosion = pygame.transform.scale(img_explosion_load, explosion_size)
 
-            keys = pygame.key.get_pressed()
-            if keys[K_UP] and self.player1.direction != K_DOWN:
-                self.player1.direction = K_UP
-            elif keys[K_DOWN] and self.player1.direction != K_UP:
-                self.player1.direction = K_DOWN
-            elif keys[K_LEFT] and self.player1.direction != K_RIGHT:
-                self.player1.direction = K_LEFT
-            elif keys[K_RIGHT] and self.player1.direction != K_LEFT:
-                self.player1.direction = K_RIGHT
+player_color = (255, 255, 255)
+player = pygame.Surface((5, 5))
+player.fill(player_color)
 
-            if keys[K_w] and self.player2.direction != K_DOWN:
-                self.player2.direction = K_UP
-            elif keys[K_s] and self.player2.direction != K_UP:
-                self.player2.direction = K_DOWN
-            elif keys[K_a] and self.player2.direction != K_RIGHT:
-                self.player2.direction = K_LEFT
-            elif keys[K_d] and self.player2.direction != K_LEFT:
-                self.player2.direction = K_RIGHT
+color_trail1 = (0, 0, 255)
+color_trail2 = (255, 255, 0)
 
-            self.player1.move()
-            self.player2.move()
+players_speed = 5
 
-            if self.player1.pos[0] < 0 or self.player1.pos[0] >= self.screen.get_width() or \
-               self.player1.pos[1] < 0 or self.player1.pos[1] >= self.screen.get_height():
-                self.if_lose = "BLUE"
-                self.lose()
+player1_pos = [275, 600]
+player1_direction = UP
+player1_trail = []
 
-            if self.player2.pos[0] < 0 or self.player2.pos[0] >= self.screen.get_width() or \
-               self.player2.pos[1] < 0 or self.player2.pos[1] >= self.screen.get_height():
-                self.if_lose = "YELLOW"
-                self.lose()
+player2_pos = [275, 100]
+player2_direction = DOWN
+player2_trail = []
 
-            if self.player1.pos in self.player1.trail[1:] or self.player1.pos in self.player2.trail:
-                self.if_lose = "BLUE"
-                self.lose()
+points_player1 = 0
+points_player2 = 0
 
-            if self.player2.pos in self.player1.trail or self.player2.pos in self.player2.trail[1:]:
-                self.if_lose = "YELLOW"
-                self.lose()
+sound_die = pygame.mixer.Sound("assets/sounds/die.mp3")
+sound_start = pygame.mixer.Sound("assets/sounds/start.mp3")
+sound_move = pygame.mixer.Sound("assets/sounds/move.mp3")
+sound_bg = pygame.mixer.Sound("assets/sounds/bg-music.mp3")
 
-            if self.player1.pos == self.player2.pos:
-                self.if_lose = "tie"
-                self.lose()
+clock_tick = 25
+clock = pygame.time.Clock()
 
-            self.player1.trail.append(self.player1.pos[:])
-            self.player2.trail.append(self.player2.pos[:])
+if_lose = ""
 
-            self.screen.blit(self.img_bg, (0, 0))
+game_over = False
 
-            for pos in self.player1.trail:
-                pygame.draw.rect(self.screen, self.player1.trail_color, (pos[0], pos[1], 5, 5))
+sound_start.play()
+time.sleep(1)
 
-            for pos in self.player2.trail:
-                pygame.draw.rect(self.screen, self.player2.trail_color, (pos[0], pos[1], 5, 5))
+sound_bg.play(-1)
 
-            if self.sec == 8:
-                self.powerUp_freezing_pos = self.onGridRandom()
-                self.sec = 0
+while not game_over:
+    clock.tick(clock_tick)
 
-            if self.player1.pos == self.powerUp_freezing_pos:
-                self.powerUp_freezing_pos = (-10, -10)
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
 
-            pygame.draw.rect(self.screen, self.player1.color, (*self.player1.pos, 5, 5))
-            pygame.draw.rect(self.screen, self.player2.color, (*self.player2.pos, 5, 5))
+    keys = pygame.key.get_pressed()
+    if keys[K_UP] and player1_direction != DOWN:
+        player1_direction = UP
+    elif keys[K_DOWN] and player1_direction != UP:
+        player1_direction = DOWN
+    elif keys[K_LEFT] and player1_direction != RIGHT:
+        player1_direction = LEFT
+    elif keys[K_RIGHT] and player1_direction != LEFT:
+        player1_direction = RIGHT
 
-            pygame.display.update()
+    if keys[K_w] and player2_direction != DOWN:
+        player2_direction = UP
+    elif keys[K_s] and player2_direction != UP:
+        player2_direction = DOWN
+    elif keys[K_a] and player2_direction != RIGHT:
+        player2_direction = LEFT
+    elif keys[K_d] and player2_direction != LEFT:
+        player2_direction = RIGHT
 
-        pygame.quit()
 
-if __name__ == "__main__":
-    game = Game()
-    game.run()
+    if player1_direction == UP:
+        player1_pos[1] -= players_speed
+    elif player1_direction == DOWN:
+        player1_pos[1] += players_speed
+    elif player1_direction == LEFT:
+        player1_pos[0] -= players_speed
+    elif player1_direction == RIGHT:
+        player1_pos[0] += players_speed
+
+    if player2_direction == UP:
+        player2_pos[1] -= players_speed
+    elif player2_direction == DOWN:
+        player2_pos[1] += players_speed
+    elif player2_direction == LEFT:
+        player2_pos[0] -= players_speed
+    elif player2_direction == RIGHT:
+        player2_pos[0] += players_speed
+
+    if player1_pos[0] < 0 or player1_pos[0] >= screen.get_width() or player1_pos[1] < 0 or player1_pos[1] >= screen.get_height():
+        if_lose = "BLUE"
+        lose()
+
+    if player2_pos[0] < 0 or player2_pos[0] >= screen.get_width() or player2_pos[1] < 0 or player2_pos[1] >= screen.get_height():
+        if_lose = "YELLOW"
+        lose()
+
+    if player1_pos in player1_trail or player1_pos in player2_trail:
+        if_lose = "BLUE"
+        lose()
+
+    if player2_pos in player1_trail or player2_pos in player2_trail:
+        if_lose = "YELLOW"
+        lose()
+
+    if player1_pos == player2_pos:
+        if_lose = "tie"
+        lose()
+
+    player1_trail.append(player1_pos[:])
+    player2_trail.append(player2_pos[:])
+
+    screen.blit(img_bg, (0, 0))
+
+    for pos in player1_trail:
+        pygame.draw.rect(screen, color_trail1, (pos[0], pos[1], 5, 5))
+
+    for pos in player2_trail:
+        pygame.draw.rect(screen, color_trail2, (pos[0], pos[1], 5, 5))
+
+    screen.blit(player, player1_pos)
+    screen.blit(player, player2_pos)
+
+    pygame.display.update()
+
+pygame.quit()
