@@ -62,12 +62,10 @@ def reset_game():
 
     player1_pos = [275, 600]
     player1_direction = UP
-    rotate_img1 = pygame.transform.rotate(img_player, 0)
     player1_trail = []
 
     player2_pos = [275, 100]
     player2_direction = DOWN
-    rotate_img2 = pygame.transform.rotate(img_player, 180)
     player2_trail = []
 
 
@@ -82,10 +80,6 @@ UP = 0
 RIGHT = 1
 DOWN = 2
 LEFT = 3
-
-explosion_size = (60, 60)
-img_explosion_load = pygame.image.load("assets/img/explosion.png")
-img_explosion = pygame.transform.scale(img_explosion_load, explosion_size)
 
 player_color = (255, 255, 255)
 player = pygame.Surface((5, 5))
